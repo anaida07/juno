@@ -87,10 +87,12 @@
     "electron-dev": "concurrently \"BROWSER=none npm start\" \"wait-on http://localhost:3000 && electron .\"",
     "electron-dev-win": "concurrently \"SET BROWSER=none && npm start\" \"wait-on http://localhost:3000 && electron .\"",
     "compile-mac": "npm run build && electron-builder -m --publish=never",
-    "compile-win": "npm run build && electron-builder -w --publish=never"
+    "compile-win": "npm run build && electron-builder -w --publish=never",
+    "compile-linux": "npm run build && electron-builder -l --publish=never"
   },
   "build": {
     "appId": "com.juno.app",
+    "productName": "Cloud Worker Hub",
     "mac": {
       "icon": "build/icon.png",
       "target": [
