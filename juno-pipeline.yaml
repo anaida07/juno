@@ -1,0 +1,265 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CodePipeline for Cloud Worker Hub
+
+Parameters:
+  GitHubRepo:
+    Type: String
+    Default: juno
+  GitHubBranch:
+    Type: String
+    Default: code-pipeline
+  GitHubUsername:
+    Type: String
+    Default: anaida07
+  GitHubToken:
+    Description: Name of Parameter Store parameter that stores the GitHubToken
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Default: '/sameer/cloudformation-ecs/githubtoken'
+    NoEcho: true
+
+Resources:
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Resource:
+                  - !Join ['', ['arn:aws:s3:::', !ImportValue BucketCodePipeline, '/*']]
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+              - Resource: '*'
+                Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                  - codebuild:BatchGetBuilds
+                  - iam:PassRole
+              - Effect: Allow
+                Action:
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:CreateStack
+                  - cloudformation:CreateUploadBucket
+                  - cloudformation:DeleteStack
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:Describe*
+                  - cloudformation:List*
+                  - cloudformation:UpdateStack
+                  - cloudformation:ValidateTemplate
+                  - cloudformation:ExecuteChangeSet
+                Resource: '*'
+
+  CloudFormationDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [cloudformation.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: !Join ['-', [!Ref 'AWS::StackName', 'CloudFormationPolicy']]
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - 's3:*'
+                  - 'iam:*'
+                Effect: Allow
+                Resource: '*'
+
+  HubInstallerStore:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+    Properties:
+      BucketName: !Sub hub-installer-store-${AWS::AccountId}
+      VersioningConfiguration:
+        Status: Enabled
+      Tags:
+        - Key: Service
+          Value: JunoCodePipeline
+        - Key: Project
+          Value: Juno
+
+  CodePipeline:
+      Type: AWS::CodePipeline::Pipeline
+      Properties:
+        RoleArn: !GetAtt CodePipelineRole.Arn
+        ArtifactStore:
+          Type: S3
+          Location: !ImportValue BucketCodePipeline
+        Stages:
+          - Name: Source
+            Actions:
+              - Name: GithubSource
+                ActionTypeId:
+                  Category: Source
+                  Owner: ThirdParty
+                  Version: "1"
+                  Provider: GitHub
+                Configuration:
+                  Owner: !Ref GitHubUsername
+                  Repo: !Ref GitHubRepo
+                  Branch: !Ref GitHubBranch
+                  OAuthToken: !Ref GitHubToken
+                OutputArtifacts:
+                  - Name: SourceOutput
+
+          - Name: BuildExecutable
+            Actions:
+              - Name: WindowsExecutable
+                ActionTypeId:
+                  Category: Build
+                  Owner: AWS
+                  Version: '1'
+                  Provider: CodeBuild
+                InputArtifacts:
+                  - Name: SourceOutput
+                OutputArtifacts:
+                  - Name: WindowsBuildOutput
+                Configuration:
+                  ProjectName: !Ref CodeBuildProjectWindows
+              - Name: LinuxExecutable
+                ActionTypeId:
+                  Category: Build
+                  Owner: AWS
+                  Version: '1'
+                  Provider: CodeBuild
+                InputArtifacts:
+                  - Name: SourceOutput
+                OutputArtifacts:
+                  - Name: LinuxBuildOutput
+                Configuration:
+                  ProjectName: !Ref CodeBuildProjectLinux
+
+          # - Name: CloudFormationDeploy
+          #   Actions:
+          #     - Name: Deploy
+          #       InputArtifacts:
+          #         - Name: BuildOutput
+          #       ActionTypeId:
+          #         Category: Deploy
+          #         Owner: AWS
+          #         Version: '1'
+          #         Provider: CloudFormation
+          #       Configuration:
+          #         StackName: optaplanner-deploy-stack
+          #         ActionMode: REPLACE_ON_FAILURE #CREATE_UPDATE
+          #         Capabilities: CAPABILITY_NAMED_IAM
+          #         TemplatePath: BuildOutput::optaplanner-stack.yaml
+          #         # TemplateConfiguration: BuildOutput::parameters.json
+          #         RoleArn: !GetAtt CloudFormationDeployRole.Arn
+          #         ParameterOverrides: |
+          #           {
+          #             "BUILDURL" : { "Fn::GetArtifactAtt" : ["BuildOutput", "URL"]}
+          #           }
+
+  CodeBuildProjectWindows:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.2
+          phases:
+            install:
+              commands:
+                - npm install
+                - apt update && apt install -y awscli && apt -y autoremove
+            build:
+              commands:
+                - echo "Installer build started on `date`"
+                - npm run compile-win
+            post_build:
+              commands:
+                - echo "Pushing artifacts"
+                - aws s3 cp dist/Cloud\ Worker\ Hub\ Setup\ 0.1.0.exe s3://${HubInstallerStore}/Windows/
+          artifacts:
+            type: zip
+            files:
+              - 'dist/**/*'
+            discard-paths: yes
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: electronuserland/builder:wine
+        Type: LINUX_CONTAINER
+      Name: !Join ['-', [ !Ref 'AWS::StackName', 'Windows' ]]
+      ServiceRole: !Ref CodeBuildIAMRole
+
+  CodeBuildProjectLinux:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: !Sub |
+          version: 0.2
+          phases:
+            install:
+              commands:
+                - npm install
+                - apt update && apt install -y awscli && apt -y autoremove
+            build:
+              commands:
+                - echo "Installer build started on `date`"
+                - npm run compile-linux
+            post_build:
+              commands:
+                - echo "Pushing artifacts"
+                - aws s3 cp dist/CloudWorkerHub-0.1.0-x86_64.AppImage s3://${HubInstallerStore}/Linux/
+          artifacts:
+            type: zip
+            files:
+              - 'dist/**/*'
+            discard-paths: yes
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: electronuserland/builder:10
+        Type: LINUX_CONTAINER
+      Name: !Join ['-', [ !Ref 'AWS::StackName', 'Linux' ]]
+      ServiceRole: !Ref CodeBuildIAMRole
+
+  CodeBuildIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ['-', [!Ref 'AWS::StackName', 'CodeBuild']]
+      Path: "/"
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - codebuild.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+        - PolicyName: !Join ['-', [!Ref 'AWS::StackName', 'CodeBuildRolePolicy']]
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:*
+                  - s3:*
+                Resource: '*'
+# Outputs:
+  
