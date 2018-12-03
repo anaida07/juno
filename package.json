@@ -6,6 +6,7 @@
   "private": true,
   "main": "public/electron.js",
   "dependencies": {
+    "@babel/preset-react": "^7.0.0",
     "@types/nprogress": "0.0.29",
     "@types/react-bootstrap": "^0.32.14",
     "@types/react-redux": "^6.0.9",
