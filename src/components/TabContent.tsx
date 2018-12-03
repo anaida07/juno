@@ -19,6 +19,7 @@ class TabContent extends React.Component<any, any> {
       isBackBtnActive: false,
       isForwardBtnActive: false,
       isPageLoading: true,
+      pageLoadCount: 1,
     }
   }
 
@@ -78,16 +79,18 @@ class TabContent extends React.Component<any, any> {
 
   public handleWebViewLoad() {
     const { tabId, credentials } = this.props;
+    const { pageLoadCount } = this.state;
+    this.props.onWebViewLoad(tabId);
+    if (credentials && pageLoadCount === 1) {
+      autoLogin(tabId, credentials);
+    }
     this.setState({
       isBackBtnActive: viewCanGoBack(tabId),
       isForwardBtnActive: viewCanGoForward(tabId),
       omniValue: getWebViewSrc(tabId),
       isPageLoading: false,
+      pageLoadCount: pageLoadCount + 1,
     });
-    this.props.onWebViewLoad(tabId);
-    if (credentials) {
-      autoLogin(tabId, credentials);
-    }
   }
 
   public handleDidStartNavigation() {
