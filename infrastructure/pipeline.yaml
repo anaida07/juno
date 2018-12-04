@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: CodePipeline for Cloud Worker Hub
+Description: CodePipeline for Cloud Worker App
 
 Parameters:
   GitHubRepo:
@@ -191,7 +191,7 @@ Resources:
             post_build:
               commands:
                 - echo "Pushing artifacts"
-                - aws s3 cp dist/CloudWorkerApp\ Setup\ 0.1.0.exe s3://${HubInstallerStore}/Windows/
+                - aws s3 cp dist/Cloud\ Worker\ Hub\ Setup\ 0.1.0.exe s3://${HubInstallerStore}/Windows/
           artifacts:
             type: zip
             files:
