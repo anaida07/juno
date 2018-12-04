@@ -32,7 +32,7 @@ const profileState = (state = user, action: any) => {
       return newState;
     case 'UPDATE_TASK_URLS':
       newState.taskUrls = action.payload.taskUrls;
-      newState.activeTab = action.payload.activeTab;
+      newState.activeTab = action.payload.activeTab ? action.payload.activeTab : newState.activeTab;
       return newState;
     case 'UPDATE_TASK_TITLES':
       newState.taskTitles = action.payload;

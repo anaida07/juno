@@ -20,7 +20,7 @@ export const fetchProfile = () =>
 
 export const fetchTasks = () =>
   (dispatch: any) =>
-    axios.get('http://hs-ecs-services-1167733196.us-east-1.elb.amazonaws.com/worker/' + localStorage.getItem('userId')+ '/tasks', {
+    axios.get(configs.HUB_SERVICE_URL + 'worker/' + localStorage.getItem('userId')+ '/tasks', {
       headers: {
         'Authorization': localStorage.getItem('auth'),
       }

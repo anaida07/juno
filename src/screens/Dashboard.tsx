@@ -7,9 +7,11 @@ import Topbar from './Topbar';
 
 class Dashboard extends React.Component<any, any> {
   public componentDidMount() {
-    const { dispatch } = this.props;
-    dispatch(fetchTasks());
-    dispatch(fetchProfile());
+    const { dispatch, taskUrls } = this.props;
+    if (!taskUrls.length) {
+      dispatch(fetchTasks());
+      dispatch(fetchProfile());
+    }
     dispatch(switchWorkMode(false));
   }
 
@@ -30,4 +32,9 @@ class Dashboard extends React.Component<any, any> {
   }
 }
 
-export default connect()(Dashboard);
+const mapStateToProps = (store: any) => {
+  return ({
+    taskUrls: store.profileState.taskUrls,
+  });
+}
+export default connect(mapStateToProps)(Dashboard);
