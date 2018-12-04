@@ -92,7 +92,7 @@
   },
   "build": {
     "appId": "com.juno.app",
-    "productName": "Cloud Worker App",
+    "productName": "Cloud Worker Hub",
     "mac": {
       "icon": "build/icon.png",
       "target": [
