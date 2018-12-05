@@ -17,6 +17,7 @@ class WebView extends React.Component<any, any> {
         view.addEventListener('did-finish-load', this.props.didFinishLoad);
         view.addEventListener('did-start-loading', this.props.didStartNavigation);
         view.addEventListener('did-stop-loading', this.props.didStopLoading);
+        view.addEventListener('new-window', this.props.onNewWindow);
       };
     }
   }

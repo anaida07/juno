@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { connect } from 'react-redux';
 import './../style/Tasks.scss';
 import WebView from './WebView';
 import { goForward,
@@ -10,6 +11,7 @@ import { goForward,
   viewCanGoForward,
   autoLogin,
 } from '../helper';
+import { updateTaskUrls, switchActiveTab } from '../action/userSession';
 
 class TabContent extends React.Component<any, any> {
   constructor(props: any) {
@@ -112,6 +114,12 @@ class TabContent extends React.Component<any, any> {
     });
   }
 
+  public handleOnNewWindow(evt: any) {
+    const { taskUrls, dispatch } = this.props;
+    taskUrls.push(evt.url);
+    dispatch(updateTaskUrls({taskUrls}));
+    dispatch(switchActiveTab(`tab${taskUrls.length}`));
+  }
   public render() {
     return (
       <div className="browser-window">
@@ -144,6 +152,7 @@ class TabContent extends React.Component<any, any> {
               didFinishLoad={() => this.handleWebViewLoad()}
               didStartNavigation={() => this.handleDidStartNavigation()}
               didStopLoading={() => this.handleDidStopLoading()}
+              onNewWindow={(evt: any) => this.handleOnNewWindow(evt)}
             />
           </div>
         </div>
@@ -152,4 +161,9 @@ class TabContent extends React.Component<any, any> {
   }
 }
 
-export default TabContent;
+const mapStateToProps = (store: any) => {
+  return ({
+    taskUrls: store.profileState.taskUrls
+  });
+}
+export default connect(mapStateToProps)(TabContent);

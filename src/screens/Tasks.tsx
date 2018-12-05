@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import './../style/Tasks.scss';
 import Topbar from './Topbar';
 import TabContent from '../components/TabContent';
-import { getWebViewTitle, getWebViewSrc } from '../helper';
+import { getWebViewTitle } from '../helper';
 import { switchWorkMode, switchActiveTab, updateTaskUrls, updateTaskTitles } from '../action/userSession';
 
 class Tasks extends React.Component<any, any> {
@@ -68,15 +68,10 @@ class Tasks extends React.Component<any, any> {
 
   public handleWebViewLoad(webviewId: string) {
     const tabIndex = Number(/\d+/.exec(webviewId)![0]);
-    const { taskTitles, dispatch, taskUrls } = this.props;
+    const { taskTitles, dispatch } = this.props;
     const tabTitle = getWebViewTitle(webviewId);
     const updatedTitles = taskTitles.slice();
-    const updatedUrls = taskUrls.slice();
-    updatedUrls[tabIndex - 1] = getWebViewSrc(webviewId);
     updatedTitles[tabIndex - 1] = tabTitle;
-    dispatch(updateTaskUrls({
-      taskUrls: updatedUrls
-    }))
     dispatch(updateTaskTitles(updatedTitles));
   }
 
