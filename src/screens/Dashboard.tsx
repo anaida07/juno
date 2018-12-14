@@ -7,11 +7,11 @@ import Topbar from './Topbar';
 
 class Dashboard extends React.Component<any, any> {
   public componentDidMount() {
-    const { dispatch, taskUrls } = this.props;
-    if (!taskUrls.length) {
+    const { dispatch } = this.props;
+
       dispatch(fetchTasks());
       dispatch(fetchProfile());
-    }
+
     dispatch(switchWorkMode(false));
   }
 

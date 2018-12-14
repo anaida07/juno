@@ -20,6 +20,7 @@ const profileState = (state = user, action: any) => {
       newState.taskTitles = action.payload.tasks.map(() => 'New Tab');
       return newState;
     case 'FETCH_TASKS_ON_ERROR':
+      newState.activeTab = 'tab1';
       newState.taskTitles = ['New Tab'];
       newState.taskUrls = ['https://google.com'];
       newState.credentials = [null];
