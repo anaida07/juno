@@ -5,6 +5,7 @@ const user = {
   credentials: [],
   taskTitles: [],
   workingMode: false,
+  zoomLevel: 0,
 };
 
 const profileState = (state = user, action: any) => {
@@ -37,6 +38,14 @@ const profileState = (state = user, action: any) => {
       return newState;
     case 'UPDATE_TASK_TITLES':
       newState.taskTitles = action.payload;
+      return newState;
+    case 'INCREASE_ZOOM':
+      newState.zoomLevel = newState.zoomLevel + 1;
+      console.log(newState.zoomLevel);
+      return newState;
+    case 'DECREASE_ZOOM':
+      newState.zoomLevel = newState.zoomLevel - 1;
+      console.log(newState.zoomLevel);
       return newState;
     default: {
       return newState;

@@ -1,3 +1,31 @@
+const { ipcRenderer } = window.require('electron');
+import store from './store';
+
+ipcRenderer.on('zoomIn', function (event, arg) {
+  const activeTab = store.getState().profileState.activeTab;
+  const currentZoom = store.getState().profileState.zoomLevel;
+  const activeIndex = /\d+/.exec(activeTab)[0];
+  const view = document.getElementById(`webview${activeIndex}`);
+  view.setZoomLevel(currentZoom + 1);
+  store.dispatch({ type: 'INCREASE_ZOOM' });
+})
+
+ipcRenderer.on('zoomOut', function (event, arg) {
+  const activeTab = store.getState().profileState.activeTab;
+  const currentZoom = store.getState().profileState.zoomLevel;
+  if(currentZoom !== 0) {
+    const activeIndex = /\d+/.exec(activeTab)[0];
+    const view = document.getElementById(`webview${activeIndex}`);
+    view.setZoomLevel(currentZoom - 1);
+    store.dispatch({ type: 'DECREASE_ZOOM' });
+  }
+})
+
+export const setDefaultZoom = (tabId) => {
+  const view = document.getElementById(tabId);
+  view.setZoomLevel(0);
+}
+
 export const goForward = (tabId) => {
   const view = document.getElementById(tabId);
   view.goForward();

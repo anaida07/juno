@@ -10,6 +10,7 @@ import { goForward,
   viewCanGoBack,
   viewCanGoForward,
   autoLogin,
+  setDefaultZoom
 } from '../helper';
 import { updateTaskUrls, switchActiveTab } from '../action/userSession';
 
@@ -22,7 +23,7 @@ class TabContent extends React.Component<any, any> {
       isForwardBtnActive: false,
       isPageLoading: true,
       pageLoadCount: 1,
-    }
+    };
   }
 
   public handleGoBack() {
@@ -93,6 +94,7 @@ class TabContent extends React.Component<any, any> {
       isPageLoading: false,
       pageLoadCount: pageLoadCount + 1,
     });
+    setDefaultZoom(tabId);
   }
 
   public handleDidStartNavigation() {
