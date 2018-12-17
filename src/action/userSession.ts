@@ -43,3 +43,21 @@ export const switchWorkMode = (val: boolean) =>
     type: 'SWITCH_WORK_MODE',
     payload: val,
   });
+
+export const switchActiveTab = (val: string) =>
+({
+  type: 'SWITCH_ACTIVE_TAB',
+  payload: val,
+});
+
+export const updateTaskUrls = (val: object) =>
+({
+  type: 'UPDATE_TASK_URLS',
+  payload: val,
+});
+
+export const updateTaskTitles = (val: []) =>
+({
+  type: 'UPDATE_TASK_TITLES',
+  payload: val,
+});

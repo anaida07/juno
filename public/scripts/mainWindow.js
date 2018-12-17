@@ -20,7 +20,7 @@ const mainWindowOptions = {
   height: 680,
   width: 900,
   webPreferences: {
-    sandbox: true,
+    sandbox: false,
     webSecurity: false
   },
 };
