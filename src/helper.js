@@ -3,23 +3,23 @@ import store from './store';
 
 ipcRenderer.on('zoomIn', function (event, arg) {
   const activeTab = store.getState().profileState.activeTab;
-  const currentZoom = store.getState().profileState.zoomLevel;
   const activeIndex = /\d+/.exec(activeTab)[0];
   const view = document.getElementById(`webview${activeIndex}`);
-  view.setZoomLevel(currentZoom + 1);
-  store.dispatch({ type: 'INCREASE_ZOOM' });
-})
+  view.getZoomLevel((val) => {
+    view.setZoomLevel(val + 1);
+  })
+});
 
 ipcRenderer.on('zoomOut', function (event, arg) {
   const activeTab = store.getState().profileState.activeTab;
-  const currentZoom = store.getState().profileState.zoomLevel;
-  if(currentZoom !== 0) {
-    const activeIndex = /\d+/.exec(activeTab)[0];
-    const view = document.getElementById(`webview${activeIndex}`);
-    view.setZoomLevel(currentZoom - 1);
-    store.dispatch({ type: 'DECREASE_ZOOM' });
-  }
-})
+  const activeIndex = /\d+/.exec(activeTab)[0];
+  const view = document.getElementById(`webview${activeIndex}`);
+  view.getZoomLevel((val) => {
+    if(val !== 0) {
+      view.setZoomLevel(val - 1);
+    }
+  })
+});
 
 export const setDefaultZoom = (tabId) => {
   const view = document.getElementById(tabId);

@@ -63,10 +63,10 @@ const attachWindowStateHandling = (mainedWindow) => {
 	mainedWindow.on('resize', () => {
 		windowStateKeeper.saveState(mainedWindow);
 	});
-	globalShortcut.register('ctrl+shift+1', function () {
+	globalShortcut.register('ctrl+shift+Plus', function () {
 		mainedWindow.webContents.send('zoomIn' , {msg:'hello from main process'});
 	});
-	globalShortcut.register('ctrl+shift+2', function () {
+	globalShortcut.register('ctrl+shift+-', function () {
 		mainedWindow.webContents.send('zoomOut' , {msg:'hello from main process'});
 	});
 	mainedWindow.on('move', () => windowStateKeeper.saveState(mainedWindow));
