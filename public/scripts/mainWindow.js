@@ -3,6 +3,7 @@ const windowState = require('./windowState');
 const utils = require('./utils');
 const path = require('path');
 const isDev = require('electron-is-dev');
+const {globalShortcut} = require('electron');
 
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
@@ -59,7 +60,15 @@ const attachWindowStateHandling = (mainedWindow) => {
 		mainedWindow = null;
 	});
 
-	mainedWindow.on('resize', () => windowStateKeeper.saveState(mainedWindow));
+	mainedWindow.on('resize', () => {
+		windowStateKeeper.saveState(mainedWindow);
+	});
+	globalShortcut.register('ctrl+shift+Plus', function () {
+		mainedWindow.webContents.send('zoomIn' , {msg:'hello from main process'});
+	});
+	globalShortcut.register('ctrl+shift+-', function () {
+		mainedWindow.webContents.send('zoomOut' , {msg:'hello from main process'});
+	});
 	mainedWindow.on('move', () => windowStateKeeper.saveState(mainedWindow));
 	mainedWindow.on('show', () => windowStateKeeper.saveState(mainedWindow));
 	mainedWindow.on('close', async(event) => {

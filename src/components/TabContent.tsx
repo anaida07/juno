@@ -10,6 +10,7 @@ import { goForward,
   viewCanGoBack,
   viewCanGoForward,
   autoLogin,
+  setDefaultZoom
 } from '../helper';
 import { updateTaskUrls, switchActiveTab } from '../action/userSession';
 
@@ -22,7 +23,7 @@ class TabContent extends React.Component<any, any> {
       isForwardBtnActive: false,
       isPageLoading: true,
       pageLoadCount: 1,
-    }
+    };
   }
 
   public handleGoBack() {
@@ -93,6 +94,7 @@ class TabContent extends React.Component<any, any> {
       isPageLoading: false,
       pageLoadCount: pageLoadCount + 1,
     });
+    setDefaultZoom(tabId);
   }
 
   public handleDidStartNavigation() {
@@ -120,6 +122,11 @@ class TabContent extends React.Component<any, any> {
     dispatch(updateTaskUrls({taskUrls}));
     dispatch(switchActiveTab(`tab${taskUrls.length}`));
   }
+
+  public handleFocus(evt: any) {
+    evt.target.select();
+  }
+
   public render() {
     return (
       <div className="browser-window">
@@ -141,6 +148,7 @@ class TabContent extends React.Component<any, any> {
                 onKeyPress={evt => this.handleOmniBoxEnter(evt)}
                 onChange={evt => this.handleOmniBoxChange(evt)}
                 value={this.state.omniValue}
+                onFocus={(evt) => this.handleFocus(evt)}
               />
             </div>
           </nav>
