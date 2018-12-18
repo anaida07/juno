@@ -5,20 +5,24 @@ ipcRenderer.on('zoomIn', function (event, arg) {
   const activeTab = store.getState().profileState.activeTab;
   const activeIndex = /\d+/.exec(activeTab)[0];
   const view = document.getElementById(`webview${activeIndex}`);
-  view.getZoomLevel((val) => {
-    view.setZoomLevel(val + 1);
-  })
+  if (view) {
+    view.getZoomLevel((val) => {
+      view.setZoomLevel(val + 1);
+    })
+  }
 });
 
 ipcRenderer.on('zoomOut', function (event, arg) {
   const activeTab = store.getState().profileState.activeTab;
   const activeIndex = /\d+/.exec(activeTab)[0];
   const view = document.getElementById(`webview${activeIndex}`);
-  view.getZoomLevel((val) => {
-    if(val !== 0) {
-      view.setZoomLevel(val - 1);
-    }
-  })
+  if (view) {
+    view.getZoomLevel((val) => {
+      if(val !== 0) {
+        view.setZoomLevel(val - 1);
+      }
+    })
+  }
 });
 
 export const setDefaultZoom = (tabId) => {
