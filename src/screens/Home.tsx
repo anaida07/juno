@@ -9,7 +9,7 @@ class Home extends React.Component<any, any> {
     const { history } = this.props;
     return (
       <div>
-        { userId ? <Dashboard history={history} /> : <Login history={history} /> }
+        { userId ? <Login history={history} /> : <Dashboard history={history} /> }
       </div>
     );
   }

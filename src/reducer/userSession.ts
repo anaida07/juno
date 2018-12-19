@@ -1,9 +1,9 @@
 const user = {
   profile: { email: '', fullname: ''},
   activeTab: 'tab1',
-  taskUrls: [],
+  taskUrls: ['https://google.com'],
   credentials: [],
-  taskTitles: [],
+  taskTitles: ['New Tab'],
   workingMode: false,
   zoomLevel: 0,
 };
