@@ -18,9 +18,7 @@ ipcRenderer.on('zoomOut', function (event, arg) {
   const view = document.getElementById(`webview${activeIndex}`);
   if (view) {
     view.getZoomLevel((val) => {
-      if(val !== 0) {
-        view.setZoomLevel(val - 1);
-      }
+      view.setZoomLevel(val - 1);
     })
   }
 });
